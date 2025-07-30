@@ -8,11 +8,6 @@ public class playerScript : MonoBehaviour
     public float moveSpeed = 5f;
     public float jumpForce = 10f;
     
-    [Header("Ground Check")]
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundLayerMask;
-    
     [Header("Camera Follow")]
     public Camera followCamera;
     public float cameraSpeed = 2f;
@@ -20,7 +15,6 @@ public class playerScript : MonoBehaviour
     public bool smoothFollow = true;
     
     private Rigidbody2D rb;
-    private bool isGrounded;
     private float horizontalInput;
     
     // Start is called before the first frame update
@@ -33,15 +27,6 @@ public class playerScript : MonoBehaviour
         {
             followCamera = Camera.main;
         }
-        
-        // Create ground check if it doesn't exist
-        if (groundCheck == null)
-        {
-            GameObject groundCheckObj = new GameObject("GroundCheck");
-            groundCheckObj.transform.SetParent(transform);
-            groundCheckObj.transform.localPosition = new Vector3(0, -0.5f, 0);
-            groundCheck = groundCheckObj.transform;
-        }
     }
 
     // Update is called once per frame
@@ -50,13 +35,10 @@ public class playerScript : MonoBehaviour
         // Get input
         horizontalInput = Input.GetAxisRaw("Horizontal");
         
-        // Check if grounded
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayerMask);
-        
-        // Jump input
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        // Simple jump input
+        if (Input.GetKeyDown(KeyCode.W))
         {
-            Jump();
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
         
         // Update camera position
@@ -67,11 +49,6 @@ public class playerScript : MonoBehaviour
     {
         // Apply horizontal movement
         rb.velocity = new Vector2(horizontalInput * moveSpeed, rb.velocity.y);
-    }
-    
-    void Jump()
-    {
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
     
     void UpdateCameraFollow()
@@ -94,16 +71,6 @@ public class playerScript : MonoBehaviour
                 // Instant camera movement
                 followCamera.transform.position = targetPosition;
             }
-        }
-    }
-    
-    void OnDrawGizmosSelected()
-    {
-        // Draw ground check circle in editor
-        if (groundCheck != null)
-        {
-            Gizmos.color = isGrounded ? Color.green : Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
 }
